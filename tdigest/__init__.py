@@ -1,5 +1,5 @@
 from collections import namedtuple
-from readerwriterlock.rwlock import RWLockWrite
+from threading import Lock
 from ._tdigest import lib as _lib
 
 DEFAULT_COMPRESSION = 400
@@ -7,7 +7,7 @@ DEFAULT_COMPRESSION = 400
 Centroid = namedtuple("Centroid", ("weight", "mean"))
 
 
-class RawTDigest:
+class RawTDigest(object):
     def __init__(self, compression=DEFAULT_COMPRESSION):
         if not isinstance(compression, int):
             raise TypeError("'compression' must be of type 'int'")
@@ -54,7 +54,7 @@ class RawTDigest:
     def compression_count(self):
         return self._struct.compression_count
 
-    def insert(self, value, weight=1):
+    def push(self, value, weight=1):
         if not isinstance(value, (float, int)):
             raise TypeError("'value' must be of type 'float' or 'int'")
 
@@ -67,7 +67,7 @@ class RawTDigest:
         _lib.tdigest_add(self._struct, value, weight)
 
     def quantile(self, value):
-        if not isinstance(value, float):
+        if not isinstance(value, (float, int)):
             raise TypeError("'value' must be of type 'float'")
 
         if value < 0.0 or value > 1.0:
@@ -101,62 +101,69 @@ class RawTDigest:
 
         _lib.tdigest_merge(self._struct, other._struct)
 
+    def simpleSerialize(self):
+        result = []
+        for c in self.centroids():
+            result.append(str(c.mean))
+            result.append(str(c.weight))
+        return '~'.join(result)
+
 
 class TDigest(RawTDigest):
     def __init__(self, compression=DEFAULT_COMPRESSION):
-        super().__init__(compression)
-        self._lock = RWLockWrite()
+        super(TDigest, self).__init__(compression)
+        self._lock = Lock()
 
     @property
     def compression(self):
-        with self._lock.gen_rlock():
-            return super().compression
+        with self._lock:
+            return super(TDigest, self).compression
 
     @property
     def threshold(self):
-        with self._lock.gen_rlock():
-            return super().threshold
+        with self._lock:
+            return super(TDigest, self).threshold
 
     @property
     def size(self):
-        with self._lock.gen_rlock():
-            return super().size
+        with self._lock:
+            return super(TDigest, self).size
 
     @property
     def weight(self):
-        with self._lock.gen_wlock():
-            return super().weight
+        with self._lock:
+            return super(TDigest, self).weight
 
     @property
     def centroid_count(self):
-        with self._lock.gen_wlock():
-            return super().centroid_count
+        with self._lock:
+            return super(TDigest, self).centroid_count
 
     @property
     def compression_count(self):
-        with self._lock.gen_rlock():
-            return super().compression_count
+        with self._lock:
+            return super(TDigest, self).compression_count
 
-    def insert(self, value, weight=1):
-        with self._lock.gen_wlock():
-            return super().insert(value, weight)
+    def push(self, value, weight=1):
+        with self._lock:
+            return super(TDigest, self).push(value, weight)
 
     def quantile(self, value):
-        with self._lock.gen_wlock():
-            return super().quantile(value)
+        with self._lock:
+            return super(TDigest, self).quantile(value)
 
     def percentile(self, value):
-        with self._lock.gen_wlock():
-            return super().percentile(value)
+        with self._lock:
+            return super(TDigest, self).percentile(value)
 
     def cdf(self, value):
-        with self._lock.gen_wlock():
-            return super().cdf(value)
+        with self._lock:
+            return super(TDigest, self).cdf(value)
 
     def centroids(self):
-        with self._lock.gen_wlock():
-            return super().centroids()
+        with self._lock:
+            return super(TDigest, self).centroids()
 
     def merge(self, other):
-        with self._lock.gen_wlock():
-            return super().merge(other)
+        with self._lock:
+            return super(TDigest, self).merge(other)

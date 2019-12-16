@@ -65,10 +65,10 @@ Usage
    compression_count = digest.compression_count
 
    # Insertion with unit weight
-   digest.insert(1000)
+   digest.push(1000)
 
    # Insertion with custom weight
-   digest.insert(1000, 2)
+   digest.push(1000, 2)
 
    # 99th percentile calculation
    quantile = digest.quantile(0.99)
@@ -83,7 +83,7 @@ Usage
 
    # Digest merging
    other = TDigest()
-   other.insert(42)
+   other.push(42)
    digest.merge(other)
 
 License

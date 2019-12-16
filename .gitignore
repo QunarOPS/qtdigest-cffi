@@ -84,6 +84,8 @@ celerybeat-schedule
 # Environments
 .env
 .venv
+.venv35
+.venv37
 env/
 venv/
 ENV/
@@ -102,3 +104,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+.DS_Store
+.vscode/
+tdigest/_tdigest.c
+tdigest/_tdigest.o
+test.py
