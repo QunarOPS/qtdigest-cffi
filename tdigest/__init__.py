@@ -104,7 +104,10 @@ class RawTDigest(object):
     def simpleSerialize(self):
         c_dic = {}
         result = []
+        _weight = self.weight
         for c in self.centroids():
+            if c.weight >= _weight:
+                continue
             c_dic.setdefault(c.mean, 0)
             c_dic[c.mean] += c.weight
         result = sorted([[m, w] for m, w in c_dic.items()], key=lambda x: x[0])
