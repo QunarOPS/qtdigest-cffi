@@ -6,7 +6,7 @@ with open(path.join(path.abspath(path.dirname(__file__)), "README.rst")) as hand
 
 setup(
     name="qtdigest-cffi",
-    version="0.2.0",
+    version="0.3.0",
     description="A data structure for accurate on-line accumulation of rank-based statistics.",
     long_description=readme,
     url="https://github.com/QunarOPS/qtdigest-cffi.git",

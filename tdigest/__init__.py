@@ -2,7 +2,7 @@ from collections import namedtuple
 from threading import Lock
 from ._tdigest import lib as _lib
 
-DEFAULT_COMPRESSION = 400
+DEFAULT_COMPRESSION = 1000
 
 Centroid = namedtuple("Centroid", ("weight", "mean"))
 
@@ -102,11 +102,13 @@ class RawTDigest(object):
         _lib.tdigest_merge(self._struct, other._struct)
 
     def simpleSerialize(self):
+        c_dic = {}
         result = []
         for c in self.centroids():
-            result.append(str(c.mean))
-            result.append(str(c.weight))
-        return '~'.join(result)
+            c_dic.setdefault(c.mean, 0)
+            c_dic[c.mean] += c.weight
+        result = sorted([[m, w] for m, w in c_dic.items()], key=lambda x: x[0])
+        return '~'.join(['%s~%s' % (r[0], r[1]) for r in result])
 
 
 class TDigest(RawTDigest):
