@@ -106,7 +106,7 @@ class RawTDigest(object):
         result = []
         _weight = self.weight
         for c in self.centroids():
-            if c.weight >= _weight:
+            if c.weight > _weight + 10000:
                 continue
             c_dic.setdefault(c.mean, 0)
             c_dic[c.mean] += c.weight
